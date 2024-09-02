@@ -1,0 +1,50 @@
+﻿name: Build and Release Go Project
+'on':
+  push:
+    branches:
+      - main
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: 1.21.0
+      - name: Build for Linux-arm64
+        run: |
+          GOARCH=arm64 GOOS=linux go build -o bin/my-project-arm64
+          docker build -t my-project-arm64:latest .
+          docker push my-project-arm64:latest
+      - name: Build for Linux-amd64
+        run: |
+          GOARCH=amd64 GOOS=linux go build -o bin/my-project-amd64
+          docker build -t my-project-amd64:latest .
+          docker push my-project-amd64:latest
+  release:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-go@v3
+        with:
+          go-version: 1.21.0
+      - name: Create GitHub Release
+        uses: actions/create-release@v1
+        with:
+          tag_name: 'v{{ github.ref }}'
+          name: 'Release {{ github.ref }}'
+          body: 'This is a release for {{ github.ref }}'
+      - name: Upload Release Assets
+        uses: actions/upload-artifact@v3
+        with:
+          name: my-project-arm64
+          path: bin/my-project-arm64
+          upload_to_release: true
+      - name: Upload Release Assets
+        uses: actions/upload-artifact@v3
+        with:
+          name: my-project-amd64
+          path: bin/my-project-amd64
+          upload_to_release: true
