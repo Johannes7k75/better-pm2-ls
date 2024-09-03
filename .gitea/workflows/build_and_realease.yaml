@@ -2,12 +2,12 @@ name: Build and Release Go Project
 on: push
 
 jobs:
-  build:
+  release:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - name: Set up Go
-        uses: actions/setup-go@v3
+        uses: actions/setup-go@v4
         with:
           go-version: 1.21.0
       - name: Build for Linux-arm64
@@ -16,30 +16,9 @@ jobs:
       - name: Build for Linux-amd64
         run: |
           GOARCH=amd64 GOOS=linux go build -o bin/pmls-amd64
-
-  release:
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-go@v3
+      - name: Release builds
+        uses: actions/release-action@main
         with:
-          go-version: 1.21.0
-      - name: Create GitHub Release
-        uses: actions/create-release@v1
-        with:
-          tag_name: 'v{{ github.ref }}'
-          name: 'Release {{ github.ref }}'
-          body: 'This is a release for {{ github.ref }}'
-      - name: Upload Release Assets
-        uses: actions/upload-artifact@v3
-        with:
-          name: pmls-arm64
-          path: bin/pmls-arm64
-          upload_to_release: true
-      - name: Upload Release Assets
-        uses: actions/upload-artifact@v3
-        with:
-          name: pmls-amd64
-          path: bin/pmls-amd64
-          upload_to_release: true
+          files: |-
+            bin/**
+          api_key: '${{secrets.RELEASE_TOKEN}}'
