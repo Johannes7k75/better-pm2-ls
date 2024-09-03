@@ -17,7 +17,7 @@ jobs:
         run: |
           GOARCH=amd64 GOOS=linux go build -o bin/pmls-amd64
       - name: Release builds
-        uses: actions/gitea-release-action@v1
+        uses: https://gitea.com/actions/gitea-release-action@v1
         with:
           files: |-
             bin/**
