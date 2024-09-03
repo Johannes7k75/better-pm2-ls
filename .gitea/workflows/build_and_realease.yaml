@@ -17,8 +17,7 @@ jobs:
         run: |
           GOARCH=amd64 GOOS=linux go build -o bin/pmls-amd64
       - name: Release builds
-        uses: actions/release-action@main
+        uses: actions/gitea-release-action@v1
         with:
           files: |-
             bin/**
-          api_key: '${{secrets.RELEASE_TOKEN}}'
